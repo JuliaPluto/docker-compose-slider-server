@@ -1,0 +1,25 @@
+services:
+  pluto:
+    image: pluto-slider-server
+    volumes:
+      - ./hedno:/pluto
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx:/etc/nginx/conf.d
+      - ./build:/var/www
+      - ./config/certbot/conf:/etc/letsencrypt
+      - ./config/certbot/www:/var/www/certbot
+    depends_on:
+      - pluto
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./config/certbot/conf:/etc/letsencrypt
+      - ./config/certbot/www:/var/www/certbot
+    depends_on:
+      - nginx
+    command: certonly --webroot --webroot-path=/var/www/certbot --email p.georgakopoulos@your.domain.net --agree-tos --no-eff-email -d your.domain.net -d subdomain.your.domain.net # --staging --force-renewal
